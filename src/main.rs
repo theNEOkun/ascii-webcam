@@ -1,5 +1,7 @@
 mod terminal;
 
+use std::ops::{Add, Div, Mul, Sub};
+
 use image::{DynamicImage, GenericImageView};
 use nokhwa::{Camera, CameraFormat, CaptureAPIBackend, FrameFormat};
 use terminal::Term;
@@ -22,8 +24,11 @@ fn get_ascii(intensity: isize) -> &'static str {
 /// * from - is the start-range
 /// * to - is the stop-range
 ///
-/// * returns - an isize
-fn map(number: isize, from: (isize, isize), to: (isize, isize)) -> isize {
+/// * returns - an T
+fn map<T>(number: T, from: (T, T), to: (T, T)) -> T
+where
+    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
+{
     to.0 + (number - from.0) * (to.1 - to.0) / (from.1 - from.0)
 }
 
@@ -48,19 +53,25 @@ fn handle_image(term: &mut Term, image: DynamicImage) {
 
 fn main() {
     let mut term = Term::new();
+    let ratio = 0.75;
     let mut camera = Camera::with_backend(
         0,
-        Some(CameraFormat::new_from(640, 320, FrameFormat::YUYV, 30)),
+        Some(CameraFormat::new_from(
+            map(640, (0, 640), (0, f32::ceil(term.width as f32 * ratio) as u32)), //(term.width / 2).into(),
+            map(480, (0, 480), (0, term.height.into())),
+            FrameFormat::YUYV,
+            30,
+        )),
         CaptureAPIBackend::Video4Linux,
     )
     .unwrap();
     camera.open_stream().unwrap();
     loop {
-        let frame = DynamicImage::ImageRgb8(camera.frame().expect("Stream is dead")).resize(
-            80,
-            60,
-            image::imageops::FilterType::Nearest,
-        );
+        let frame = DynamicImage::ImageRgb8(camera.frame().expect("Stream is dead"));
+        // .resize(
+        // (term.width / 2).into(),
+        // term.height.into(),
+        // image::imageops::FilterType::Nearest);
 
         handle_image(&mut term, frame);
     }
