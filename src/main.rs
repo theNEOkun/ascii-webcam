@@ -1,23 +1,21 @@
-mod terminal;
 mod camera;
+mod terminal;
 
 use std::ops::{Add, Div, Mul, Sub};
 
-use image::{DynamicImage, GenericImageView};
-use terminal::Term;
 use camera::OwnCamera;
+use crossterm::style::{self, StyledContent, Color, Attribute, Stylize};
+use image::{DynamicImage, GenericImageView, Rgba, Pixel};
+use terminal::Term;
 
 const ASCII: [&str; 29] = [
     "Ñ", "@", "#", "W", "$", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0", "?", "a", "b", "c",
     ";", ":", "+", "=", "-", ",", ".", "_", " ", " ",
 ];
 
-const ASCII_LEN: isize = ASCII.len() as isize - 1;
+const SPACE: &str = " ";
 
-/// Gets the specified ascii-character
-fn get_ascii(intensity: isize) -> &'static str {
-    ASCII[(intensity) as usize]
-}
+const ASCII_LEN: isize = ASCII.len() as isize - 1;
 
 /// Maps a number from an old range to a new range
 ///
@@ -33,6 +31,22 @@ where
     to.0 + (number - from.0) * (to.1 - to.0) / (from.1 - from.0)
 }
 
+/// Gets the specified ascii-character
+fn get_ascii_styled(pixel: &Rgba<u8>) -> StyledContent<&'static str> {
+    //let main_color = pixel.channels().iter().max().unwrap();
+    let intensity = pixel[0] / 3 + pixel[1] / 3 + pixel[2] / 3;
+    let char_index = map(intensity.into(), (0, 255), (ASCII_LEN, 0)) as usize;
+    //SPACE.with(Color::Rgb { r: pixel[0], g: pixel[1], b: pixel[2] })
+    ASCII[char_index].white()
+}
+
+/// Gets the specified ascii-character
+fn get_ascii(pixel: &Rgba<u8>) -> &'static str {
+    let intensity = pixel[0] / 3 + pixel[1] / 3 + pixel[2] / 3;
+    let char_index = map(intensity.into(), (0, 255), (ASCII_LEN, 0)) as usize;
+    ASCII[char_index]
+}
+
 /// Function which handles the image to ascii-conversion
 ///
 /// * term - is the terminal to use
@@ -41,15 +55,25 @@ fn handle_image(term: &mut Term, image: DynamicImage) {
     let (width, height) = image.dimensions();
 
     term.draw(&mut |term| {
+//        for each in image.pixels().enumerate() {
+//
+//        }
         for y_pos in 0..height {
             for x_pos in 0..width {
                 let pixel = image.get_pixel(x_pos, y_pos);
-                let intensity = pixel[0] / 3 + pixel[1] / 3 + pixel[2] / 3;
-                let char_index = map(intensity.into(), (0, 255), (ASCII_LEN, 0));
-                term.put_pixel(x_pos, y_pos, get_ascii(char_index));
+                term.put_pixel(x_pos, y_pos, get_ascii(&pixel));
             }
         }
     });
+}
+
+fn camera_handler(term: &mut Term, camera: &mut OwnCamera) {
+    loop {
+        let frame = camera.get_frame();
+
+        handle_image(term, frame);
+    }
+
 }
 
 fn main() {
@@ -57,9 +81,5 @@ fn main() {
     let width = u32::max(640 >> 2, term.width.into());
     let height = u32::max(480 >> 2, term.height.into());
     let mut camera = OwnCamera::new(width, height);
-    loop {
-        let frame = camera.get_frame();
-
-        handle_image(&mut term, frame);
-    }
+    camera_handler(&mut term, &mut camera);
 }

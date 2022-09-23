@@ -1,6 +1,6 @@
 use crossterm::{
     cursor,
-    style::{PrintStyledContent, Stylize},
+    style::{PrintStyledContent, Stylize, StyledContent},
     terminal,
     ExecutableCommand, QueueableCommand,
 };
@@ -58,14 +58,19 @@ impl Term {
     }
 
     /// Function which puts a string at an x and y
-    pub fn put_pixel(&mut self, x: u32, y: u32, what: &str) {
+    pub fn put_pixel_styled(&mut self, x: u32, y: u32, what: &StyledContent<&str>) {
         self.stdout
             .queue(cursor::MoveTo(x as u16, y as u16))
             .expect("Something went wrong when drawing the circle")
             .queue(cursor::Hide)
             .expect("Could not hide the cursor")
-            .queue(PrintStyledContent(what.white()))
+            .queue(PrintStyledContent(*what))
             .expect("Something went wrong with the coloring");
+    }
+
+    /// Function which puts a string at an x and y
+    pub fn put_pixel(&mut self, x: u32, y: u32, what: &str) {
+        self.put_pixel_styled(x, y, &what.white());
     }
 }
 
