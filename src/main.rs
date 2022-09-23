@@ -6,9 +6,9 @@ use image::{DynamicImage, GenericImageView};
 use nokhwa::{Camera, CameraFormat, CaptureAPIBackend, FrameFormat};
 use terminal::Term;
 
-const ASCII: [&str; 32] = [
+const ASCII: [&str; 30] = [
     "Ñ", "@", "#", "W", "$", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0", "?", "a", "b", "c",
-    ";", ":", "+", "=", "-", ",", ".", "_", " ", " ", " ", " ", " ",
+    ";", ":", "+", "=", "-", ",", ".", "_", " ", " ", " "
 ];
 
 const ASCII_LEN: isize = ASCII.len() as isize - 1;
@@ -57,7 +57,11 @@ fn main() {
     let mut camera = Camera::with_backend(
         0,
         Some(CameraFormat::new_from(
-            map(640, (0, 640), (0, f32::ceil(term.width as f32 * ratio) as u32)), //(term.width / 2).into(),
+            map(
+                640,
+                (0, 640),
+                (0, f32::ceil(term.width as f32 * ratio) as u32),
+            ),
             map(480, (0, 480), (0, term.height.into())),
             FrameFormat::YUYV,
             30,
