@@ -57,7 +57,6 @@ fn main() {
     let width = u32::max(640 >> 2, term.width.into());
     let height = u32::max(480 >> 2, term.height.into());
     let mut camera = OwnCamera::new(width, height);
-    camera.open_stream().unwrap();
     loop {
         let frame = camera.get_frame();
 
