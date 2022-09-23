@@ -1,7 +1,7 @@
 use crossterm::{
     cursor,
     style::{PrintStyledContent, Stylize},
-    terminal::{self, size},
+    terminal,
     ExecutableCommand, QueueableCommand,
 };
 use std::io::{stdout, Stdout, Write};
@@ -19,12 +19,19 @@ pub struct Term {
 impl Term {
     /// Creates a new terminal, with everything set
     pub fn new() -> Self {
+        const RATIO: f32 = 480.0/640.0;
+        const RATIO_H: f32 = 640.0/480.0;
+        const WIDTH: u16 = 160;// u32::min(f32::ceil(term.width as f32 * ratio) as u32, 640);
+        const HEIGHT: u16 = 120;// u32::min(term.height.into(), 480);
         let stdout = stdout();
-        let (column, row) = terminal::size().unwrap();
+        let (width, height) = terminal::size().unwrap();
+        println!("{}: {}", width, height);
+        let width = f32::ceil(height as f32 * RATIO_H) as u16;
+        println!("{}: {}", width, height);
         Self {
             stdout,
-            width: column,
-            height: row,
+            width,
+            height,
         }
     }
 
@@ -59,12 +66,6 @@ impl Term {
             .expect("Could not hide the cursor")
             .queue(PrintStyledContent(what.white()))
             .expect("Something went wrong with the coloring");
-    }
-}
-
-impl Drop for Term {
-    fn drop(&mut self) {
-        todo!();
     }
 }
 
