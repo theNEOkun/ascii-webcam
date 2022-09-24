@@ -40,6 +40,6 @@ impl OwnCamera {
                 yuyv422_to_rgb888(&self.camera.frame_raw().expect("Stream is dead")).expect("Conversion failed"),
             )
             .unwrap(),
-        )
+        ).resize_exact(self.width >> 2, self.height >> 3, image::imageops::FilterType::Nearest)
     }
 }
