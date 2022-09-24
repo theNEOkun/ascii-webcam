@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use image::{DynamicImage, GenericImage, GenericImageView, ImageBuffer, Pixel, Rgb, Rgba};
+use image::{DynamicImage, GenericImage, GenericImageView, Pixel, Rgba};
 
 pub struct ImageStruct {
     image: DynamicImage,
@@ -21,11 +21,10 @@ impl ImageStruct {
     pub fn dimensions(&self) -> (u32, u32) {
         (self.width, self.height)
     }
-    pub fn pixel_image(&mut self, scale: u32) {
-        let (width, height) = self.dimensions();
 
-        for y_pos in (0..height).step_by(scale as usize) {
-            for x_pos in (0..width).step_by(scale as usize) {
+    pub fn pixel_image(&mut self, scale: u32) {
+        for y_pos in (0..self.height).step_by(scale as usize) {
+            for x_pos in (0..self.width).step_by(scale as usize) {
                 let mut min_pixel: Option<Rgba<u8>> = None;
 
                 for i_y_pos in y_pos..y_pos + scale {
@@ -58,10 +57,8 @@ impl ImageStruct {
     }
 
     pub fn funky_image(&mut self, scale: u32) {
-        let (width, height) = self.dimensions();
-
-        for y_pos in (0..height).step_by(scale as usize) {
-            for x_pos in (0..width).step_by(scale as usize) {
+        for y_pos in (0..self.height).step_by(scale as usize) {
+            for x_pos in (0..self.width).step_by(scale as usize) {
                 let mut rgb: [u8; 3] = [0; 3];
                 let mut size = 0;
                 for i_y_pos in y_pos..y_pos + scale {
