@@ -1,5 +1,7 @@
 use image::{DynamicImage, ImageBuffer};
-use nokhwa::{yuyv422_to_rgb888, CameraFormat, CaptureAPIBackend, FrameFormat, Camera};
+use nokhwa::{yuyv422_to_rgb888, Camera, CameraFormat, CaptureAPIBackend, FrameFormat};
+
+use crate::image_struct::ImageStruct;
 
 pub struct OwnCamera {
     height: u32,
@@ -23,7 +25,7 @@ impl OwnCamera {
         }
     }
 
-    pub fn get_frame(&mut self) -> DynamicImage {
+    pub fn get_frame(&mut self) -> ImageStruct {
         // let bytes = self.camera.frame_raw().expect("Stream is dead").to_vec();
         // DynamicImage::ImageRgb8(
         //     ImageBuffer::from_raw(
@@ -33,13 +35,21 @@ impl OwnCamera {
         //     )
         //     .unwrap(),
         // )
-        DynamicImage::ImageRgb8(
-            ImageBuffer::from_raw(
-                self.width,
-                self.height,
-                yuyv422_to_rgb888(&self.camera.frame_raw().expect("Stream is dead")).expect("Conversion failed"),
+        ImageStruct::new(
+            DynamicImage::ImageRgb8(
+                ImageBuffer::from_raw(
+                    self.width,
+                    self.height,
+                    yuyv422_to_rgb888(&self.camera.frame_raw().expect("Stream is dead"))
+                        .expect("Conversion failed"),
+                )
+                .unwrap(),
             )
-            .unwrap(),
-        ).resize_exact(self.width >> 2, self.height >> 3, image::imageops::FilterType::Nearest)
+            .resize_exact(
+                self.width >> 2,
+                self.height >> 3,
+                image::imageops::FilterType::Nearest,
+            ),
+        )
     }
 }
