@@ -64,13 +64,10 @@ fn handle_image(term: &mut Term, image: ImageStruct) {
     let (width, height) = image.dimensions();
 
     term.draw(&mut |term| {
-        //        for each in image.pixels().enumerate() {
-        //
-        //        }
         for y_pos in 0..height {
             for x_pos in 0..width {
                 let pixel = image.get_pixel(x_pos, y_pos);
-                term.put_pixel(x_pos, y_pos, get_ascii(&pixel));
+                term.put_pixel_styled(x_pos, y_pos, &get_ascii_styled(&pixel));
             }
         }
     });

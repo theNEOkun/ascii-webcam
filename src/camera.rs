@@ -26,15 +26,6 @@ impl OwnCamera {
     }
 
     pub fn get_frame(&mut self) -> ImageStruct {
-        // let bytes = self.camera.frame_raw().expect("Stream is dead").to_vec();
-        // DynamicImage::ImageRgb8(
-        //     ImageBuffer::from_raw(
-        //         self.width,
-        //         self.height,
-        //         bytes,
-        //     )
-        //     .unwrap(),
-        // )
         ImageStruct::new(
             DynamicImage::ImageRgb8(
                 ImageBuffer::from_raw(
@@ -47,7 +38,7 @@ impl OwnCamera {
             )
             .resize_exact(
                 self.width >> 2,
-                self.height >> 3,
+                self.height >> 2,
                 image::imageops::FilterType::Nearest,
             ),
         )

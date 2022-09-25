@@ -59,7 +59,7 @@ impl ImageStruct {
     pub fn funky_image(&mut self, scale: u32) {
         for y_pos in (0..self.height).step_by(scale as usize) {
             for x_pos in (0..self.width).step_by(scale as usize) {
-                let mut rgb: [u8; 3] = [0; 3];
+                let mut rgb: [u8; 4] = [0; 4];
                 let mut size = 0;
                 for i_y_pos in y_pos..y_pos + scale {
                     for i_x_pos in x_pos..x_pos + scale {
@@ -73,12 +73,13 @@ impl ImageStruct {
                 rgb[0] = u8::min(rgb[0] / size, 255);
                 rgb[1] = u8::min(rgb[1] / size, 255);
                 rgb[2] = u8::min(rgb[2] / size, 255);
+                rgb[4] = 255;
                 for i_y_pos in y_pos..y_pos + scale {
                     for i_x_pos in x_pos..x_pos + scale {
                         self.image.put_pixel(
                             i_x_pos,
                             i_y_pos,
-                            Rgba::from_channels(rgb[0], rgb[1], rgb[2], 255),
+                            *Rgba::from_slice(&rgb),
                         );
                     }
                 }
