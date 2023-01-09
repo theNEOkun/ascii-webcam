@@ -1,6 +1,6 @@
 mod camera;
-mod terminal;
 mod image_struct;
+mod terminal;
 
 use std::ops::{Add, Div, Mul, Sub};
 
@@ -10,6 +10,11 @@ use image::{DynamicImage, GenericImage, GenericImageView, Pixel, Rgba};
 use image_struct::ImageStruct;
 use terminal::Term;
 
+use eframe::{
+    egui::{self, ColorImage},
+    App,
+};
+
 const ASCII: [&str; 29] = [
     "Ñ", "@", "#", "W", "$", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0", "?", "a", "b", "c",
     ";", ":", "+", "=", "-", ",", ".", "_", " ", " ",
@@ -18,6 +23,42 @@ const ASCII: [&str; 29] = [
 const SPACE: &str = " ";
 
 const ASCII_LEN: isize = ASCII.len() as isize - 1;
+
+struct MyApp {
+    camera: OwnCamera,
+    texture: Option<(egui::Vec2, egui::TextureId)>,
+}
+
+impl MyApp {
+    pub fn new(camera: OwnCamera) -> Self {
+        Self {
+            camera,
+            texture: None,
+        }
+    }
+}
+
+impl App for MyApp {
+    fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        let mut p_frame = self.camera.get_frame();
+        p_frame.pixel_image(2);
+
+        let size = [
+            p_frame.dimensions().0 as usize,
+            p_frame.dimensions().1 as usize,
+        ];
+
+        let texture = ctx.load_texture(
+            "frame",
+            ColorImage::from_rgba_unmultiplied(size, p_frame.as_bytes()),
+            egui::TextureFilter::Linear,
+        );
+
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("Hello World");
+        });
+    }
+}
 
 /// Maps a number from an old range to a new range
 ///
@@ -86,5 +127,7 @@ fn main() {
     let width = 640;
     let height = 480;
     let mut camera = OwnCamera::new(width, height);
-    camera_handler(&mut term, &mut camera);
+    let app = MyApp::new(camera);
+    let native_options = eframe::NativeOptions::default();
+    eframe::run_native("My egui App", native_options, Box::new(|cc| Box::new(app)));
 }

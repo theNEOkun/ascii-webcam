@@ -13,7 +13,7 @@ impl OwnCamera {
     pub fn new(width: u32, height: u32) -> Self {
         let mut camera = Camera::with_backend(
             0,
-            Some(CameraFormat::new_from(width, height, FrameFormat::YUYV, 30)),
+            Some(CameraFormat::new_from(width, height, FrameFormat::MJPEG, 30)),
             CaptureAPIBackend::Video4Linux,
         )
         .unwrap();
@@ -31,8 +31,7 @@ impl OwnCamera {
                 ImageBuffer::from_raw(
                     self.width,
                     self.height,
-                    yuyv422_to_rgb888(&self.camera.frame_raw().expect("Stream is dead"))
-                        .expect("Conversion failed"),
+                    yuyv422_to_rgb888(&*self.camera.frame_raw().expect("Stream is dead")).unwrap(),
                 )
                 .unwrap(),
             )
